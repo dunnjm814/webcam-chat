@@ -1,0 +1,30 @@
+{
+  "name": "webcam-chat",
+  "version": "1.0.0",
+  "description": "Experimenting with a webcam chat on nodeJS, socketio and webrtc",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "watch": "npx watchify ./public/app.js -o"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dunnjm814/webcam-chat.git"
+  },
+  "keywords": [],
+  "author": "Jason Dunn",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dunnjm814/webcam-chat/issues"
+  },
+  "homepage": "https://github.com/dunnjm814/webcam-chat#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "simple-peer": "^9.11.0",
+    "socket.io": "^4.1.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7",
+    "watchify": "^4.0.0"
+  }
+}
