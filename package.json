@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
-    "watch": "npx watchify ./public/app.js -o"
+    "watch": "npx watchify ./public/app.js -o ./public/bundle.js"
   },
   "repository": {
     "type": "git",
