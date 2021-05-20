@@ -4,7 +4,7 @@
   "description": "Experimenting with a webcam chat on nodeJS, socketio and webrtc",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon server.js",
+    "start": "node server.js",
     "watch": "npx watchify ./public/app.js -o ./public/bundle.js"
   },
   "repository": {
@@ -20,10 +20,13 @@
   "homepage": "https://github.com/dunnjm814/webcam-chat#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "per-env": "^1.0.2",
+    "pg": "^8.6.0",
     "simple-peer": "^9.11.0",
     "socket.io": "^4.1.2"
   },
   "devDependencies": {
+    "dotenv": "^9.0.2",
     "nodemon": "^2.0.7",
     "watchify": "^4.0.0"
   }
