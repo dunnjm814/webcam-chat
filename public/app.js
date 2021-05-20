@@ -92,7 +92,7 @@ navigator.mediaDevices.getUserMedia({ video: true, audio: true })
 .catch(err => document.write(err))
 
 darkMode.addEventListener("click", () => {
-  if (checkboxTheme.checked == true) {
+  if (darkMode.checked == true) {
     document.body.style.backgroundColor = "#212529";
     if (document.querySelector("#muteText")) {
       document.querySelector("#muteText").style.color = "#fff";
@@ -111,7 +111,7 @@ function createDiv() {
   div.id = "muteText"
   div.innerHTML = "Click to Mute/Unmute"
   document.querySelector('#peerDiv').appendChild(div)
-  if (checkboxTheme.checked == true) {
+  if (darkMode.checked == true) {
     document.querySelector("#muteText").style.color = "#fff";
   }
 }
