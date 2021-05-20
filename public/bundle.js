@@ -8258,101 +8258,125 @@ function config (name) {
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],35:[function(require,module,exports){
-let Peer = require('simple-peer')
-let socket = io()
-const video = document.querySelector('video')
-const darkMode = document.querySelector('#theme')
-let client = {}
-
-
-// get stream
-
-navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-  .then(stream => {
-    socket.emit("NewClient")
+let Peer = require("simple-peer");
+let socket = io();
+const video = document.querySelector("video");
+const filter = document.querySelector("#filter");
+const checkboxTheme = document.querySelector("#theme");
+let client = {};
+let currentFilter;
+//get stream
+navigator.mediaDevices
+  .getUserMedia({ video: true, audio: true })
+  .then((stream) => {
+    socket.emit("NewClient");
     video.srcObject = stream;
-    video.play()
+    video.play();
 
-    // init a peer
+    filter.addEventListener("change", (event) => {
+      currentFilter = event.target.value;
+      video.style.filter = currentFilter;
+      SendFilter(currentFilter);
+      event.preventDefault;
+    });
+
+    //used to initialize a peer
     function InitPeer(type) {
-      let peer = new Peer({ initiator: (type === 'init') ? true : false, stream: stream, trickle: false })
-      peer.on('stream', (stream) => {
-        createVideo(stream)
-      })
-      peer.on('close', () => {
-        document.getElementById('peerVideo').remove()
-        peer.destroy()
-      })
+      let peer = new Peer({
+        initiator: type == "init" ? true : false,
+        stream: stream,
+        trickle: false,
+      });
+      peer.on("stream", function (stream) {
+        CreateVideo(stream);
+      });
+      //This isn't working in chrome; works perfectly in firefox.
+      // peer.on('close', function () {
+      //     document.getElementById("peerVideo").remove();
+      //     peer.destroy()
+      // })
+      peer.on("data", function (data) {
+        let decodedData = new TextDecoder("utf-8").decode(data);
+        let peervideo = document.querySelector("#peerVideo");
+        peervideo.style.filter = decodedData;
+      });
       return peer;
     }
-    // for peer of type init
-    function makePeer() {
+
+    //for peer of type init
+    function MakePeer() {
       client.gotAnswer = false;
-      let peer = InitPeer('init')
-      peer.on('signal', (data) => {
+      let peer = InitPeer("init");
+      peer.on("signal", function (data) {
         if (!client.gotAnswer) {
-          socket.emit('Offer', data)
+          socket.emit("Offer", data);
         }
-      })
+      });
       client.peer = peer;
     }
 
-    // for peer of type not init
-    function frontAnswer(offer) {
-      let peer = InitPeer('notInit')
-      peer.on('signal', (data) => {
-        socket.emit('Answer', data)
-      })
-      peer.signal(offer)
-      client.peer = peer
+    //for peer of type not init
+    function FrontAnswer(offer) {
+      let peer = InitPeer("notInit");
+      peer.on("signal", (data) => {
+        socket.emit("Answer", data);
+      });
+      peer.signal(offer);
+      client.peer = peer;
     }
 
-    function signalAnswer(answer) {
-      client.gotAnswer = true
-      let peer = client.peer
-      peer.signal(answer)
+    function SignalAnswer(answer) {
+      client.gotAnswer = true;
+      let peer = client.peer;
+      peer.signal(answer);
     }
 
-    function createVideo(stream) {
-      createDiv()
+    function CreateVideo(stream) {
+      CreateDiv();
 
-      let video = document.createElement('video')
-      video.id = 'peerVideo'
-      video.srcObject = stream
-      video.setAttribute('class', 'embed-responsive-item')
-      document.querySelector('#peer-div').appendChild(video)
-      video.play()
+      let video = document.createElement("video");
+      video.id = "peerVideo";
+      video.srcObject = stream;
+      video.setAttribute("class", "embed-responsive-item");
+      document.querySelector("#peerDiv").appendChild(video);
+      video.play();
+      //wait for 1 sec
+      setTimeout(() => SendFilter(currentFilter), 1000);
 
-      video.addEventListener('click', () => {
-                if (video.volume != 0)
-                    video.volume = 0
-                else
-                    video.volume = 1
-            })
+      video.addEventListener("click", () => {
+        if (video.volume != 0) video.volume = 0;
+        else video.volume = 1;
+      });
     }
 
-    function sessionActive() {
-      console.write("session active")
+    function SessionActive() {
+      document.write("Session Active. Please come back later");
     }
 
-    function removePeer() {
-            document.getElementById("peerVideo").remove();
-            document.getElementById("muteText").remove();
-            if (client.peer) {
-                client.peer.destroy()
-            }
-        }
+    function SendFilter(filter) {
+      if (client.peer) {
+        client.peer.send(filter);
+      }
+    }
 
-    socket.on('BackOffer', frontAnswer)
-    socket.on('BackAnswer', signalAnswer)
-    socket.on('SessionActive', sessionActive)
-    socket.on('CreatePeer', makePeer)
-    socket.on('Disconnect', removePeer)
+    function RemovePeer() {
+      document.getElementById("peerVideo").remove();
+      document.getElementById("muteText").remove();
+      if (client.peer) {
+        client.peer.destroy();
+      }
+    }
+
+    socket.on("BackOffer", FrontAnswer);
+    socket.on("BackAnswer", SignalAnswer);
+    socket.on("SessionActive", SessionActive);
+    socket.on("CreatePeer", MakePeer);
+    socket.on("Disconnect", RemovePeer);
   })
-.catch(err => document.write(err))
+  .catch((err) => document.write(err));
 
-darkMode.addEventListener("click", () => {
-  if (darkMode.checked == true) {
+checkboxTheme.addEventListener("click", () => {
+  if (checkboxTheme.checked == true) {
     document.body.style.backgroundColor = "#212529";
     if (document.querySelector("#muteText")) {
       document.querySelector("#muteText").style.color = "#fff";
@@ -8365,15 +8389,14 @@ darkMode.addEventListener("click", () => {
   }
 });
 
-function createDiv() {
-  let div = document.createElement('div')
-  div.setAttribute('class', "centered")
-  div.id = "muteText"
-  div.innerHTML = "Click to Mute/Unmute"
-  document.querySelector('#peerDiv').appendChild(div)
-  if (darkMode.checked == true) {
+function CreateDiv() {
+  let div = document.createElement("div");
+  div.setAttribute("class", "centered");
+  div.id = "muteText";
+  div.innerHTML = "Click to Mute/Unmute";
+  document.querySelector("#peerDiv").appendChild(div);
+  if (checkboxTheme.checked == true)
     document.querySelector("#muteText").style.color = "#fff";
-  }
 }
 
 },{"simple-peer":28}]},{},[35]);
